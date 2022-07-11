@@ -1,16 +1,30 @@
+from uuid import UUID
+
+from pygraphic import GQLQuery, GQLType
+from src.utils import request_query_parse_response
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-from .. import db
 from . import Page
+
+
+class Route(GQLType):
+    id: UUID
+    number: str
+
+
+class GetAllRoutes(GQLQuery):
+    routes: list[Route]
 
 
 class RoutesPage(Page):
     def __init__(self):
-        self.message = f"Маршруты ({len(db.routes)})"
+        result = request_query_parse_response(GetAllRoutes)
+
+        self.message = f"Маршруты ({len(result.routes)})"
 
         keyboard = []
         COLUMNS = 5
-        for i, route in enumerate(db.routes):
+        for i, route in enumerate(result.routes):
             if not i % COLUMNS:
                 keyboard.append([])
             button = InlineKeyboardButton(
