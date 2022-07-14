@@ -1,7 +1,4 @@
-import html
-import json
 import logging
-import traceback
 
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -72,28 +69,17 @@ async def handle_route(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 @error_handler()
 async def error(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
-    assert context.error is not None
-
-    logging.exception(context.error)
+    assert (error := context.error) is not None
+    logging.exception(error)
 
     assert isinstance(update, Update)
-    tb_list = traceback.format_exception(context.error)
-    tb_string = "".join(tb_list)
 
-    update_str = update.to_dict()
-    message = (
-        f"An exception was raised while handling an update\n"
-        f"<pre>update = {html.escape(json.dumps(update_str, indent=2, ensure_ascii=False))}"
-        "</pre>\n\n"
-        f"<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n"
-        f"<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n"
-    )
+    answer = error.__class__.__name__
 
-    left_length = 4096 - len(message) - len("<pre></pre>")
-
-    message_tb_part = html.escape(tb_string)[:left_length]
-
-    message += f"<pre>{message_tb_part}</pre>"
-
-    assert update.effective_message is not None
-    await update.effective_message.reply_text(message, parse_mode="HTML")
+    if update.callback_query:
+        MAX_LENGTH = 200
+        await update.callback_query.answer(answer[:MAX_LENGTH], show_alert=False)
+    else:
+        MAX_LENGTH = 4096
+        assert update.effective_message is not None
+        await update.effective_message.reply_text(answer[:MAX_LENGTH])
