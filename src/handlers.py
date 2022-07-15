@@ -1,11 +1,18 @@
 import logging
 
 from telegram import Update
+from telegram.error import BadRequest
 from telegram.ext import ContextTypes
 
 
 async def error(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
     assert (error := context.error) is not None
+
+    if type(error) is BadRequest and error.message.startswith(
+        "Message is not modified"
+    ):
+        return
+
     logging.exception(error)
 
     assert isinstance(update, Update)
