@@ -1,6 +1,7 @@
 import logging
 
-from telegram.ext import ApplicationBuilder
+from telegram import Bot, BotCommand
+from telegram.ext import Application, ApplicationBuilder
 
 import src.commands.route
 import src.commands.routes
@@ -16,7 +17,20 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 
-application = ApplicationBuilder().token(BOT_TOKEN).build()
+
+async def post_init(application: Application):
+    bot: Bot = application.bot
+    await bot.set_my_commands(
+        [
+            BotCommand("start", "Display the starting menu"),
+            BotCommand("routes", "Display information about all transport routes"),
+            BotCommand("route", "Display information about a specific transport route"),
+            BotCommand("help", "Display the help menu"),
+        ]
+    )
+
+
+application = ApplicationBuilder().token(BOT_TOKEN).post_init(post_init).build()
 application.add_handlers(
     [
         src.commands.start.handler,
