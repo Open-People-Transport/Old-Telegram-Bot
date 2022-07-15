@@ -9,7 +9,7 @@ from telegram.ext import CallbackQueryHandler, ContextTypes
 
 
 class Parameters(GQLParameters):
-    type_name: str
+    type_id: str
 
 
 class Route(GQLType):
@@ -18,16 +18,16 @@ class Route(GQLType):
 
 
 class Type(GQLType):
-    name: str
+    id: str
     routes: list[Route]
 
 
 class EmptyType(GQLType):
-    name: str
+    id: str
 
 
 class GetRoutesForType(GQLQuery, parameters=Parameters):
-    type: Type = Field(name=Parameters.type_name)
+    type: Type = Field(id=Parameters.type_id)
     types: list[EmptyType]
 
 
@@ -40,8 +40,8 @@ def translate_routes_title(count: int = 10):
     return f"{count or 'нет'} маршрутов"
 
 
-def translate_title_type_name(type_name: str):
-    match type_name:
+def translate_type_for_title(type_id: str):
+    match type_id:
         case "bus":
             return "автобуса"
         case "trolley":
@@ -50,11 +50,11 @@ def translate_title_type_name(type_name: str):
             return "трамвая"
         case "train":
             return "поезда"
-    return f"({type_name})"
+    return f"({type_id})"
 
 
-def translate_type_name(type_name: str):
-    match type_name:
+def translate_type_for_button(type_id: str):
+    match type_id:
         case "bus":
             return "автобус"
         case "trolley":
@@ -63,17 +63,17 @@ def translate_type_name(type_name: str):
             return "трамвай"
         case "train":
             return "поезд"
-    return f"({type_name})"
+    return f"({type_id})"
 
 
 def get_message(selected_type: str = "bus") -> tuple[str, InlineKeyboardMarkup]:
     data = request_query_parse_response(
-        GetRoutesForType, Parameters(type_name=selected_type)
+        GetRoutesForType, Parameters(type_id=selected_type)
     )
 
     title = translate_routes_title(len(data.type.routes)).capitalize()
-    title_type_name = translate_title_type_name(data.type.name)
-    text = f"{title} {title_type_name}"
+    title_type_id = translate_type_for_title(data.type.id)
+    text = f"{title} {title_type_id}"
 
     def gen_keyboard() -> Iterator[list[InlineKeyboardButton]]:
         COLUMN_COUNT = 5
@@ -92,11 +92,11 @@ def get_message(selected_type: str = "bus") -> tuple[str, InlineKeyboardMarkup]:
 
             def gen_buttons():
                 for type in data.types[first_i : first_i + COLUMN_COUNT]:
-                    type_name = translate_type_name(type.name).capitalize()
-                    if type.name == selected_type:
-                        type_name = f"💠 {type_name} 💠"
+                    type_id = translate_type_for_button(type.id).capitalize()
+                    if type.id == selected_type:
+                        type_id = f"💠 {type_id} 💠"
                     yield InlineKeyboardButton(
-                        type_name, callback_data=f"routes {type.name}"
+                        type_id, callback_data=f"routes {type.id}"
                     )
 
             yield list(gen_buttons())
