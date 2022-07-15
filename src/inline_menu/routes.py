@@ -1,3 +1,4 @@
+from typing import Iterator
 from uuid import UUID
 
 from pygraphic import GQLQuery, GQLType
@@ -20,22 +21,20 @@ def get_message() -> tuple[str, InlineKeyboardMarkup]:
 
     text = f"Маршруты ({len(data.routes)})"
 
-    keyboard: list[list[InlineKeyboardButton]] = []
-    COLUMNS = 5
-    for i, route in enumerate(data.routes):
-        if not i % COLUMNS:
-            keyboard.append([])
-        button = InlineKeyboardButton(
-            f"{route.number: ^10}", callback_data=f"route {route.id}"
-        )
-        keyboard[-1].append(button)
-    keyboard[-1].extend(
-        [InlineKeyboardButton(" ", callback_data="routes")]
-        * (COLUMNS - len(keyboard[-1]))
-    )
-    keyboard.append([InlineKeyboardButton("Назад", callback_data="start")])
+    def gen_keyboard() -> Iterator[list[InlineKeyboardButton]]:
+        COLUMN_COUNT = 5
+        for first_i in range(0, len(data.routes), COLUMN_COUNT):
+            row = [
+                InlineKeyboardButton("·", callback_data="blank")
+                for _ in range(COLUMN_COUNT)
+            ]
+            for button, route in zip(row, data.routes[first_i:]):
+                button.text = route.number.center(6)
+                button.callback_data = f"route {route.id}"
+            yield row
+        yield [InlineKeyboardButton("Назад", callback_data="start")]
 
-    return text, InlineKeyboardMarkup(keyboard)
+    return text, InlineKeyboardMarkup(list(gen_keyboard()))
 
 
 async def callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

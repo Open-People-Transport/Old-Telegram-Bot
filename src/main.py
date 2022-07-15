@@ -7,6 +7,7 @@ import src.commands.route
 import src.commands.routes
 import src.commands.start
 import src.handlers
+import src.inline_menu.blank
 import src.inline_menu.route
 import src.inline_menu.routes
 import src.inline_menu.start
@@ -36,6 +37,7 @@ application.add_handlers(
         src.commands.start.handler,
         src.commands.routes.handler,
         src.commands.route.handler,
+        src.inline_menu.blank.handler,
         src.inline_menu.start.handler,
         src.inline_menu.routes.handler,
         src.inline_menu.route.handler,
