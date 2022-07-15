@@ -65,7 +65,7 @@ def get_message(route_id: str) -> tuple[str, InlineKeyboardMarkup]:
     return text, InlineKeyboardMarkup(keyboard)
 
 
-async def handle_route(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     assert (query := update.callback_query) is not None
     assert query.data is not None
     args = query.data.split()[1:]
@@ -74,4 +74,4 @@ async def handle_route(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     await query.edit_message_text(text, reply_markup=reply_markup)
 
 
-handler = CallbackQueryHandler(handle_route, "route")
+handler = CallbackQueryHandler(callback, "route")

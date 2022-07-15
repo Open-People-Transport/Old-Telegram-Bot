@@ -13,11 +13,11 @@ def get_message() -> tuple[str, InlineKeyboardMarkup]:
     return text, InlineKeyboardMarkup(keyboard)
 
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message is None:
         raise GeneralBotException
     text, reply_markup = get_message()
     await update.message.reply_text(text, reply_markup=reply_markup)
 
 
-handler = CommandHandler("start", start)
+handler = CommandHandler("start", callback)

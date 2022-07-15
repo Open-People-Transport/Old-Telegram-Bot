@@ -38,11 +38,11 @@ def get_message() -> tuple[str, InlineKeyboardMarkup]:
     return text, InlineKeyboardMarkup(keyboard)
 
 
-async def handle_routes(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     assert (query := update.callback_query) is not None
     text, reply_markup = get_message()
     await query.answer()
     await query.edit_message_text(text, reply_markup=reply_markup)
 
 
-handler = CallbackQueryHandler(handle_routes, "routes")
+handler = CallbackQueryHandler(callback, "routes")

@@ -3,7 +3,7 @@ from telegram import Update
 from telegram.ext import CommandHandler, ContextTypes
 
 
-async def route(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message is None:
         raise GeneralBotException
 
@@ -14,4 +14,4 @@ async def route(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(text)
 
 
-handler = CommandHandler("route", route)
+handler = CommandHandler("route", callback)
