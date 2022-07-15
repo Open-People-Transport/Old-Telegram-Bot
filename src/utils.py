@@ -11,6 +11,7 @@ def request_query_parse_response(
     Query: Type[QueryType], parameters: Optional[GQLParameters] = None
 ) -> QueryType:
     query = Query.get_query_string()
+    query = query.replace("String", "String!")
     variables = parameters.dict() if parameters else None
     data = {"query": query, "variables": variables}
     try:
@@ -23,3 +24,12 @@ def request_query_parse_response(
         return result
     except Exception as err:
         raise
+
+
+_blank_data_counter = 0
+
+
+def get_unique_blank():
+    global _blank_data_counter
+    _blank_data_counter += 1
+    return f"blank {_blank_data_counter}"
