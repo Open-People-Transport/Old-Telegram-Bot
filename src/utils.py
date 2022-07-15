@@ -11,8 +11,7 @@ def request_query_parse_response(
     Query: Type[QueryType], parameters: Optional[GQLParameters] = None
 ) -> QueryType:
     query = Query.get_query_string()
-    query = query.replace("String", "String!")
-    variables = parameters.dict() if parameters else None
+    variables = parameters.dict(by_alias=True) if parameters else None
     data = {"query": query, "variables": variables}
     try:
         response = requests.post(
@@ -20,7 +19,10 @@ def request_query_parse_response(
             data=json.dumps(data, default=str),
             headers={"Content-Type": "application/json"},
         )
-        result = Query.parse_obj(response.json()["data"])
+        response_json = response.json()
+        if errors := response_json.get("errors"):
+            raise Exception(errors)
+        result = Query.parse_obj(response_json["data"])
         return result
     except Exception as err:
         raise

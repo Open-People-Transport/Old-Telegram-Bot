@@ -7,7 +7,7 @@ from src.utils import request_query_parse_response
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackQueryHandler, ContextTypes
 
-pygraphic.types.register_graphql_type("UUID!", UUID)
+pygraphic.types.register_graphql_type("UUID", UUID)
 
 
 class Parameters(GQLParameters):
@@ -42,7 +42,10 @@ class GetRouteWithNodes(GQLQuery, parameters=Parameters):
 
 
 def get_message(route_id: str) -> tuple[str, InlineKeyboardMarkup]:
-    result = request_query_parse_response(GetRouteWithNodes, Parameters(id=route_id))
+    result = request_query_parse_response(
+        GetRouteWithNodes,
+        Parameters(id=UUID(route_id)),
+    )
 
     text = f"Маршрут {result.route.number}"
 
